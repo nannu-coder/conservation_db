@@ -47,4 +47,14 @@ INSERT INTO sightings (sighting_id, species_id, ranger_id, location, sighting_ti
 
 INSERT INTO rangers(name, region) VALUES('Derek Fox', 'Coastal Plains');
 
-SELECT * FROM species;
+--! Count unique species ever sighted.
+
+--* Find all sightings where the location includes "Pass".
+SELECT * FROM sightings WHERE location LIKE '%Pass%';
+
+
+--List each ranger's name and their total number of sightings.
+SELECT r.name, COUNT(s.sighting_id) as total_sightings 
+FROM sightings s
+INNER JOIN rangers r ON r.ranger_id = s.ranger_id
+GROUP BY r.name;
