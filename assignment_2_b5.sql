@@ -47,7 +47,7 @@ INSERT INTO sightings (sighting_id, species_id, ranger_id, location, sighting_ti
 
 INSERT INTO rangers(name, region) VALUES('Derek Fox', 'Coastal Plains');
 
---! Count unique species ever sighted.
+SELECT COUNT(DISTINCT species_id) FROM sightings;
 
 --* Find all sightings where the location includes "Pass".
 SELECT * FROM sightings WHERE location LIKE '%Pass%';
@@ -58,3 +58,47 @@ SELECT r.name, COUNT(s.sighting_id) as total_sightings
 FROM sightings s
 INNER JOIN rangers r ON r.ranger_id = s.ranger_id
 GROUP BY r.name;
+
+SELECT s.common_name 
+ FROM species s 
+ LEFT JOIN sightings r ON s.species_id = r.species_id
+ WHERE r.species_id IS NULL;
+
+SELECT sp.common_name, si.sighting_time, r.name 
+ FROM sightings si
+ INNER JOIN species sp ON sp.species_id = si.species_id
+ INNER JOIN rangers r ON r.ranger_id = si.ranger_id
+ ORDER BY sighting_time DESC LIMIT 2;
+
+UPDATE species SET conservation_status = 'Historic'
+ WHERE EXTRACT(year from discovery_date) < 1800;
+
+SELECT sighting_id,
+    CASE 
+        WHEN EXTRACT(hour from sighting_time) < 12 THEN 'Morning'
+        WHEN EXTRACT(hour from sighting_time) BETWEEN 12 AND 17 THEN 'Afternoon'
+        ELSE 'Evening'
+    END AS time_of_day
+    FROM sightings;
+
+
+SELECT r.name, s.location 
+    FROM rangers r 
+    INNER JOIN sightings s ON r.ranger_id = s.ranger_id;
+
+ALTER TABLE sightings DROP CONSTRAINT sightings_ranger_id_fkey;
+
+ALTER TABLE sightings 
+    ADD CONSTRAINT sightings_ranger_id_fkey 
+    FOREIGN KEY(ranger_id) REFERENCES rangers(ranger_id) 
+    ON DELETE CASCADE;
+
+DELETE FROM rangers r
+    WHERE r.ranger_id NOT IN (
+        SELECT DISTINCT s.ranger_id from sightings s
+    );
+
+    SELECT * FROM rangers;
+
+
+    
