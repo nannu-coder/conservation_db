@@ -1,4 +1,6 @@
 -- Active: 1747580400581@@127.0.0.1@5432@conservation_db
+
+--* Create Tables
 CREATE TABLE rangers(
     ranger_id SERIAL PRIMARY KEY,
     name VARCHAR(50),
@@ -25,6 +27,7 @@ CREATE TABLE sightings(
     Foreign Key (species_id) REFERENCES species(species_id)
 );
 
+--* Insert Data
 INSERT INTO rangers(name, region) VALUES 
 ('Alice Green', 'Northern Hills'),
 ('Bob White', 'River Delta'),
@@ -43,36 +46,42 @@ INSERT INTO sightings (sighting_id, species_id, ranger_id, location, sighting_ti
 (3, 3, 3, 'Bamboo Grove East', '2024-05-15 09:10:00', 'Feeding observed'),
 (4, 1, 2, 'Snowfall Pass', '2024-05-18 18:30:00', NULL);
 
---* PostgreSQL Problems
 
+--? PostgreSQL Problems
+--** Insert Data Operation Problem
 INSERT INTO rangers(name, region) VALUES('Derek Fox', 'Coastal Plains');
 
+--** Count Data Problem
 SELECT COUNT(DISTINCT species_id) FROM sightings;
 
---* Find all sightings where the location includes "Pass".
+--** Search Data with keyword Problem
 SELECT * FROM sightings WHERE location LIKE '%Pass%';
 
 
---List each ranger's name and their total number of sightings.
+--** Join Table and Count Data Problem
 SELECT r.name, COUNT(s.sighting_id) as total_sightings 
 FROM sightings s
 INNER JOIN rangers r ON r.ranger_id = s.ranger_id
 GROUP BY r.name;
 
+--** Conditional Read operation Problem
 SELECT s.common_name 
  FROM species s 
  LEFT JOIN sightings r ON s.species_id = r.species_id
  WHERE r.species_id IS NULL;
 
+--** Filter and Sorting Data Problem
 SELECT sp.common_name, si.sighting_time, r.name 
  FROM sightings si
  INNER JOIN species sp ON sp.species_id = si.species_id
  INNER JOIN rangers r ON r.ranger_id = si.ranger_id
  ORDER BY sighting_time DESC LIMIT 2;
 
+--** Conditional Bulk Operation Problem
 UPDATE species SET conservation_status = 'Historic'
  WHERE EXTRACT(year from discovery_date) < 1800;
 
+--** Conditional Update Operation
 SELECT sighting_id,
     CASE 
         WHEN EXTRACT(hour from sighting_time) < 12 THEN 'Morning'
@@ -82,6 +91,7 @@ SELECT sighting_id,
     FROM sightings;
 
 
+--** Delete Operation with CASCADE
 SELECT r.name, s.location 
     FROM rangers r 
     INNER JOIN sightings s ON r.ranger_id = s.ranger_id;
@@ -97,8 +107,6 @@ DELETE FROM rangers r
     WHERE r.ranger_id NOT IN (
         SELECT DISTINCT s.ranger_id from sightings s
     );
-
-    SELECT * FROM rangers;
 
 
     
